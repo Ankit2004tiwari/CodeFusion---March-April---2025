@@ -9,61 +9,61 @@ const features = [
     name: "Breach Monitoring Alerts",
     slug: "breach-monitoring",
     description:
-      "Stay instantly informed about suspicious activities and data breach attempts.",
+      "Get real-time alerts for breaches, suspicious logins, and firewall bypass attempts to secure critical data instantly.",
   },
   {
     name: "AI Threat Scanner",
     slug: "ai-threat-scanner",
     description:
-      "Real-time AI analysis of files, links, and scripts to detect sophisticated threats.",
+      "Analyze scripts, files, or text using AI to detect malware, phishing, and zero-day threats proactively.",
   },
   {
     name: "Cyber Hygiene Score",
     slug: "cyber-hygiene-score",
     description:
-      "Assess the strength of your cybersecurity posture and receive actionable insights.",
+      "Audit password strength, 2FA, and update practices—like a credit score, but for your cybersecurity posture.",
   },
   {
     name: "Attack Simulation",
     slug: "attack-simulation",
     description:
-      "Simulate real-world cyberattacks to expose vulnerabilities and train your team.",
+      "Run simulated phishing, brute-force, and SQL injection attacks to find vulnerabilities and train users.",
   },
   {
     name: "Secure Password Vault",
     slug: "password-vault",
     description:
-      "Safely store and manage strong passwords using military-grade encryption.",
+      "Encrypt and manage your passwords securely in a personal vault with export, import, and 2FA protection.",
   },
   {
     name: "Location-Based Login Alerts",
     slug: "location-login-alerts",
     description:
-      "Get alerted for unusual login attempts based on geolocation tracking.",
+      "Stay informed when logins occur from unfamiliar or suspicious locations to prevent account takeover.",
   },
   {
     name: "Zero Trust Login System",
     slug: "zero-trust-login",
     description:
-      "Adopt Zero Trust principles with continuous verification and session control.",
+      "Authenticate every session with continuous, context-based policies that block risky or unauthorized access.",
   },
   {
     name: "Interactive Security Labs",
     slug: "security-labs",
     description:
-      "Hands-on labs for secure coding, penetration testing, and red-team practice.",
+      "Practice ethical hacking, pen testing, and secure coding in sandboxed labs designed for real-world learning.",
   },
   {
     name: "Malicious File & Link Analyzer",
     slug: "malicious-analyzer",
     description:
-      "Instant analysis of links and files to identify malware and phishing threats.",
+      "Upload files or paste URLs to detect ransomware, malware, or phishing with signature + AI-based detection.",
   },
   {
     name: "Session & Device Management Dashboard",
     slug: "session-device-management",
     description:
-      "Visualize and manage active sessions and connected devices in real-time.",
+      "Monitor and manage your active sessions, devices, and terminate unauthorized activity in real-time.",
   },
 ];
 
@@ -72,11 +72,11 @@ export default function DashboardPage() {
   const [greetingType, setGreetingType] = useState("guest");
 
   useEffect(() => {
-    const type = localStorage.getItem("userType");
-    const name = localStorage.getItem("userName");
+    const userType = localStorage.getItem("userType");
+    const storedName = localStorage.getItem("userName");
 
-    if (type === "register" && name) {
-      setUserName(name);
+    if (userType === "register" && storedName) {
+      setUserName(storedName);
       setGreetingType("register");
       localStorage.removeItem("userType");
       localStorage.removeItem("userName");
@@ -85,8 +85,9 @@ export default function DashboardPage() {
         try {
           const res = await fetch("/api/getUserName");
           const data = await res.json();
-          setUserName(data?.name || "Guest");
-          setGreetingType(data?.name ? "signin" : "guest");
+          const name = data?.name || "Guest";
+          setUserName(name);
+          setGreetingType(name === "Guest" ? "guest" : "signin");
         } catch {
           setUserName("Guest");
           setGreetingType("guest");
@@ -97,14 +98,13 @@ export default function DashboardPage() {
   }, []);
 
   const greeting = (() => {
-    switch (greetingType) {
-      case "signin":
-        return `Welcome back, ${userName}. Your digital fortress awaits. 🛡️`;
-      case "register":
-        return `Welcome to Guardian AI, ${userName}. Let’s build your security legacy. 🔐`;
-      default:
-        return `Welcome to Guardian AI – Explore our security features in guest mode.`;
+    if (greetingType === "signin") {
+      return `Welcome back, ${userName}. Your security command center is ready.`;
     }
+    if (greetingType === "register") {
+      return `Welcome aboard, ${userName}. Let’s build your secure future together.`;
+    }
+    return `Welcome, Guest. Explore enterprise-grade cybersecurity features.`;
   })();
 
   const cardVariants = {
@@ -116,61 +116,61 @@ export default function DashboardPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-      className="min-h-screen px-4 sm:px-8 py-10 bg-gradient-to-br from-blue-50 to-teal-100 dark:from-gray-950 dark:to-gray-900"
+      transition={{ duration: 0.5 }}
+      className="min-h-screen px-6 py-12 bg-gradient-to-br from-white via-blue-50 to-blue-100 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900"
     >
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+      <motion.h2
+        className="text-3xl md:text-4xl font-bold text-center mb-4 text-blue-900 dark:text-blue-300"
+        initial={{ scale: 0.9 }}
+        animate={{ scale: 1 }}
         transition={{ duration: 0.6 }}
-        className="text-center mb-12"
       >
-        <h2 className="text-4xl font-bold text-gray-800 dark:text-blue-300 drop-shadow-sm">
-          {greeting}
-        </h2>
-        <p className="mt-3 text-gray-600 dark:text-gray-400 text-lg">
-          Dive into your cybersecurity command center and unleash
-          enterprise-grade protection.
-        </p>
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: {},
-            visible: { transition: { staggerChildren: 0.1 } },
-          }}
-        >
-          {features.map((feature, i) => (
-            <motion.div
-              key={i}
-              variants={cardVariants}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-              className="relative group bg-white/60 dark:bg-white/10 backdrop-blur-md border border-blue-100 dark:border-blue-900 rounded-2xl p-6 shadow-xl overflow-hidden transition-all duration-300"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-100/40 to-teal-100/20 dark:from-blue-900/30 dark:to-gray-800/30 opacity-0 group-hover:opacity-100 transition duration-300 blur-md rounded-2xl" />
+        {greeting}
+      </motion.h2>
 
-              <Link href={`/Features/${feature.slug}`}>
-                <div className="relative z-10">
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-teal-500 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
-                      <span className="text-xl font-bold">
-                        {feature.name.charAt(0)}
-                      </span>
-                    </div>
-                    <h3 className="ml-4 text-xl font-semibold text-gray-800 dark:text-blue-300 group-hover:text-indigo-600 transition-colors">
-                      {feature.name}
-                    </h3>
+      <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+        Explore your AI-enhanced cybersecurity dashboard designed for
+        professionals and enterprise security teams.
+      </p>
+
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: {},
+          visible: { transition: { staggerChildren: 0.1 } },
+        }}
+      >
+        {features.map((feature, i) => (
+          <motion.div
+            key={i}
+            variants={cardVariants}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            className="relative group bg-white/60 dark:bg-white/10 backdrop-blur-md border border-blue-100 dark:border-blue-900 rounded-2xl p-6 shadow-xl overflow-hidden transition-all duration-300"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-100/40 to-teal-100/20 dark:from-blue-900/30 dark:to-gray-800/30 opacity-0 group-hover:opacity-100 transition duration-300 blur-md rounded-2xl" />
+
+            <Link href={`/Features/${feature.slug}`}>
+              <div className="relative z-10">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-teal-500 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300">
+                    <span className="text-xl font-bold">
+                      {feature.name.charAt(0)}
+                    </span>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                    {feature.description}
-                  </p>
+                  <h3 className="ml-4 text-xl font-semibold text-gray-800 dark:text-blue-300 group-hover:text-indigo-600 transition-colors">
+                    {feature.name}
+                  </h3>
                 </div>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
+                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            </Link>
+          </motion.div>
+        ))}
       </motion.div>
     </motion.div>
   );
