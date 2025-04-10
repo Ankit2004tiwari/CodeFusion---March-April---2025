@@ -1,108 +1,114 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import axios from 'axios';
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import axios from "axios";
 
 const features = [
   {
-    name: 'Breach Monitoring Alerts',
-    slug: 'breach-monitoring',
+    name: "Breach Monitoring Alerts",
+    slug: "breach-monitoring",
     description:
-      'Real-time alerts for breaches, suspicious logins, and firewall bypass attempts. Immediate notifications empower your team to act fast and protect critical data.',
+      "Real-time alerts for breaches, suspicious logins, and firewall bypass attempts. Immediate notifications empower your team to act fast and protect critical data.",
   },
   {
-    name: 'AI Threat Scanner',
-    slug: 'ai-threat-scanner',
+    name: "AI Threat Scanner",
+    slug: "ai-threat-scanner",
     description:
-      'Leverages cutting-edge AI to detect malware, phishing, and zero-day threats, ensuring proactive defense against evolving cyber risks.',
+      "Leverages cutting-edge AI to detect malware, phishing, and zero-day threats, ensuring proactive defense against evolving cyber risks.",
   },
   {
-    name: 'Cyber Hygiene Score',
-    slug: 'cyber-hygiene-score',
+    name: "Cyber Hygiene Score",
+    slug: "cyber-hygiene-score",
     description:
-      'Evaluates your security practices including password strength, 2FA usage, and system updates – think of it as a credit score for your cybersecurity health.',
+      "Evaluates your security practices including password strength, 2FA usage, and system updates – think of it as a credit score for your cybersecurity health.",
   },
   {
-    name: 'Attack Simulation',
-    slug: 'attack-simulation',
+    name: "Attack Simulation",
+    slug: "attack-simulation",
     description:
-      'Simulate real-world attacks like phishing, brute-force, and SQL injection to uncover vulnerabilities and train your team in a risk-free environment.',
+      "Simulate real-world attacks like phishing, brute-force, and SQL injection to uncover vulnerabilities and train your team in a risk-free environment.",
   },
   {
-    name: 'Secure Password Vault',
-    slug: 'password-vault',
+    name: "Secure Password Vault",
+    slug: "password-vault",
     description:
-      'An encrypted vault for managing your passwords safely, ensuring you use strong, unique credentials while safeguarding against unauthorized access.',
+      "An encrypted vault for managing your passwords safely, ensuring you use strong, unique credentials while safeguarding against unauthorized access.",
   },
   {
-    name: 'Location-Based Login Alerts',
-    slug: 'location-login-alerts',
+    name: "Location-Based Login Alerts",
+    slug: "location-login-alerts",
     description:
-      'Get notified when logins occur from unusual or distant locations, helping you quickly identify and prevent potential account takeovers.',
+      "Get notified when logins occur from unusual or distant locations, helping you quickly identify and prevent potential account takeovers.",
   },
   {
-    name: 'Zero Trust Login System',
-    slug: 'zero-trust-login',
+    name: "Zero Trust Login System",
+    slug: "zero-trust-login",
     description:
-      'Implements continuous, multi-step authentication that verifies every access attempt, ensuring no one is trusted by default—even if credentials are compromised.',
+      "Implements continuous, multi-step authentication that verifies every access attempt, ensuring no one is trusted by default—even if credentials are compromised.",
   },
   {
-    name: 'Interactive Security Labs',
-    slug: 'security-labs',
+    name: "Interactive Security Labs",
+    slug: "security-labs",
     description:
-      'Hands-on labs that let you practice ethical hacking, penetration testing, and secure coding in real-time, building your skills through experience.',
+      "Hands-on labs that let you practice ethical hacking, penetration testing, and secure coding in real-time, building your skills through experience.",
   },
   {
-    name: 'Malicious File & Link Analyzer',
-    slug: 'malicious-analyzer',
+    name: "Malicious File & Link Analyzer",
+    slug: "malicious-analyzer",
     description:
-      'Scan files and URLs for potential threats using a combination of AI and signature analysis, keeping malware, ransomware, and phishing attacks at bay.',
+      "Scan files and URLs for potential threats using a combination of AI and signature analysis, keeping malware, ransomware, and phishing attacks at bay.",
   },
   {
-    name: 'Session & Device Management Dashboard',
-    slug: 'session-device-management',
+    name: "Session & Device Management Dashboard",
+    slug: "session-device-management",
     description:
-      'Gain complete visibility and control over active sessions and devices, allowing you to quickly terminate unauthorized access and secure your environment.',
+      "Gain complete visibility and control over active sessions and devices, allowing you to quickly terminate unauthorized access and secure your environment.",
   },
 ];
 
-
 export default function DashboardPage() {
-  const [userType, setUserType] = useState<string>('guest');
-  const [userName, setUserName] = useState<string>('Guest');
+  const [userType, setUserType] = useState<string>("guest");
+  const [userName, setUserName] = useState<string>("Guest");
+  const [loading, setLoading] = useState(true);
+  const [greetingType, setGreetingType] = useState<string>("guest");
 
   useEffect(() => {
-    const fetchUserName = async () => {
-      try {
-        const type = localStorage.getItem('userType') || 'guest';
-        setUserType(type);
-  
-        if (type === 'login' || type === 'register') {
-          const response = await axios.get('/api/getUserName');
-          const data = response.data as { name?: string };
-          
-          setUserName(data.name || 'User');
-        } else {
-          setUserName('Guest');
+    const userType = localStorage.getItem("userType");
+    const userName = localStorage.getItem("userName");
+
+    if (userType === "register" && userName) {
+      setGreetingType("register");
+      setUserName(userName);
+      localStorage.removeItem("userType");
+      localStorage.removeItem("userName");
+    } else {
+      const fetchUserName = async () => {
+        try {
+          const res = await fetch("/api/getUserName");
+          const data = await res.json();
+
+          const name = data?.name || "Guest";
+          setUserName(name);
+          setGreetingType(name === "Guest" ? "guest" : "signin");
         }
-      } catch (error) {
-        console.error('Error fetching user name:', error);
-        setUserName('Guest');
-      }
-    };
-  
-    fetchUserName();
+         catch (error) {
+          console.error("Failed to fetch user name:", error);
+          setUserName("Guest");
+          setGreetingType("guest");
+        }
+      };
+
+      fetchUserName();
+    }
   }, []);
-  
-  
 
   const greeting = (() => {
-    if (userType === 'login') {
+    if (userType === "login") {
       return `Welcome back, ${userName}! We're thrilled to have our security expert back in action. 🔐`;
     }
-    if (userType === 'register') {
+    if (userType === "register") {
       return `Welcome aboard, ${userName}! 🚀 Your journey toward a secure digital future starts here.`;
     }
     return `You're in Guest Mode 👀 – Explore our powerful features and experience top-notch cybersecurity.`;
@@ -130,7 +136,8 @@ export default function DashboardPage() {
       </motion.h2>
 
       <p className="text-center text-gray-600 dark:text-gray-300 mb-12 text-lg max-w-2xl mx-auto">
-        Dive into your personalized dashboard to explore our suite of innovative cybersecurity tools.
+        Dive into your personalized dashboard to explore our suite of innovative
+        cybersecurity tools.
       </p>
 
       <motion.div

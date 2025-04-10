@@ -1,31 +1,54 @@
 // lib/auth.ts
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import pool from './db';
 import bcrypt from 'bcryptjs';
+import pool from './db';
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: {},
-        password: {},
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials) return null;
-        const [rows]: any = await pool.query('SELECT * FROM users WHERE email = ?', [credentials.email]);
-        const user = rows[0];
-        if (!user) return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Please enter both email and password.');
+        }
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
+        try {
+          const [rows]: any[] = await pool.execute(
+            'SELECT * FROM users WHERE email = ?',
+            [credentials.email]
+          );
+          const user = rows[0];
 
-        return { id: user.id, name: user.name, email: user.email };
+          if (!user) {
+            throw new Error('No user found with this email.');
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isPasswordValid) {
+            throw new Error('Invalid password.');
+          }
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          };
+        } catch (error) {
+          console.error('Authorization error:', error);
+          throw new Error('Authentication failed. Please try again.');
+        }
       },
     }),
   ],
-  // ✅ Required addition to avoid JWEDecryptionFailed
   session: {
     strategy: 'jwt',
   },
@@ -40,84 +63,15 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if (session.user && token) {
         session.user.id = token.id as string;
-        session.user.name = token.name;
-        session.user.email = token.email;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
       }
       return session;
     },
   },
+  pages: {
+    signIn: '/sign-in', // adjust if your signin page path is different
+  },
 };
-
-
-
-// import { NextAuthOptions } from 'next-auth';
-// import CredentialsProvider from 'next-auth/providers/credentials';
-// import bcrypt from 'bcryptjs';
-// import pool from './db';
-
-// export const authOptions: NextAuthOptions = {
-//   providers: [
-//     CredentialsProvider({
-//       name: 'Credentials',
-//       credentials: {
-//         email: { label: 'Email', type: 'email' },
-//         password: { label: 'Password', type: 'password' },
-//       },
-//       async authorize(credentials) {
-//         if (!credentials?.email || !credentials?.password) {
-//           throw new Error('Please enter both email and password.');
-//         }
-
-//         const [rows]: [any[], any] = await pool.execute(
-//           'SELECT * FROM users WHERE email = ?',
-//           [credentials.email]
-//         );
-
-//         const user = rows[0];
-
-//         if (!user) {
-//           throw new Error('No user found with this email.');
-//         }
-
-//         const isPasswordValid = await bcrypt.compare(
-//           credentials.password,
-//           user.password
-//         );
-
-//         if (!isPasswordValid) {
-//           throw new Error('Invalid password.');
-//         }
-
-//         return {
-//           id: user.id,
-//           email: user.email,
-//           name: user.name,
-//         };
-//       },
-//     }),
-//   ],
-//   session: {
-//     strategy: 'jwt',
-//   },
-//   pages: {
-//     signIn: '/auth/signin',
-//   },
-//   callbacks: {
-//     async jwt({ token, user }: { token: any; user?: any }) {
-//       if (user) {
-//         token.id = user.id;
-//       }
-//       return token;
-//     },
-//     async session({ session, token }: { session: any; token: any }) {
-//       if (session.user && token.id) {
-//         session.user.id = token.id;
-//       }
-//       return session;
-//     }
-//   }  
-// };
-
-

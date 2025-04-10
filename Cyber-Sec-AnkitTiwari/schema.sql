@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS security_alerts (
   status ENUM('active', 'resolved', 'ignored') DEFAULT 'active',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
-<<<<<<< HEAD
 ); 
 
 CREATE TABLE IF NOT EXISTS threats (
@@ -37,6 +36,3 @@ CREATE TABLE IF NOT EXISTS threats (
   description TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-=======
-); 
->>>>>>> da4c3ff5ff49d019bf8fc4947019a1719ce4ed32

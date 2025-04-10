@@ -9,9 +9,12 @@ export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); 
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
     const res = await signIn('credentials', {
       redirect: false,
@@ -19,12 +22,14 @@ export default function SignInPage() {
       password,
     });
 
+    setLoading(false);
+
     if (res?.ok) {
-      // Store userType for greeting purposes
       localStorage.setItem('userType', 'login');
       router.push('/dashboard');
     } else {
-      setError('Invalid email or password.');
+      // Optional: more specific error handling
+      setError(res?.error || 'Invalid email or password.');
     }
   };
 
@@ -50,12 +55,17 @@ export default function SignInPage() {
             required
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
-          {error && <p className="text-red-500">{error}</p>}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg transition duration-300"
+            disabled={loading}
+            className={`w-full py-2 rounded-lg transition duration-300 text-white ${
+              loading
+                ? 'bg-indigo-400 cursor-not-allowed'
+                : 'bg-indigo-600 hover:bg-indigo-700'
+            }`}
           >
-            Sign In
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
       </div>
